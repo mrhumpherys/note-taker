@@ -1,12 +1,12 @@
 const express = require('express');
 const PORT = process.env.PORT || 3001;
 const app = express();
-const { notes } = require('./db/db.json');
+let { notes } = require('./db/db.json');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto')
 
-app.use(express.urlencoded({ extend: true }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -20,7 +20,21 @@ function createNewNote(body, noteArray) {
     );
     return newNote;
 }
+app.delete('/api/notes/:id', (req, res) => {
+    const reqID = req.params.id;
 
+    let note = notes.filter(note => {
+        return note.id === reqID;
+    })[0];
+
+    console.log(note);
+    const index = notes.indexOf(note);
+
+    notes.splice(index, 1);
+
+    fs.writeFileSync('./db/db.json', JSON.stringify(notes), 'utf8');
+    res.json("Note deleted");
+});
 app.get('/api/notes', (req, res) => {
     let results = notes;
     res.json(results);
